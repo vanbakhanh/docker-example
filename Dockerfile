@@ -5,10 +5,11 @@ LABEL maintainer="vanbakhanh@gmail.com"
 # Interactive dialogue
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Libraries
+# Install Libraries & Runtime
 RUN apt-get update && \
     apt-get install -y curl \
-    software-properties-common
+    software-properties-common \
+    vim
 
 # Install Supervisor
 RUN apt-get install -y supervisor
@@ -44,7 +45,6 @@ RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 # Configure vhost Apache
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod rewrite
 
 # Configure vhost Nginx
 COPY docker/nginx/vhost /etc/nginx/sites-available/default
@@ -52,9 +52,12 @@ COPY docker/nginx/vhost /etc/nginx/sites-available/default
 # Configure supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Copy entrypoint shell script
+COPY docker/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80 443
 
 WORKDIR /var/www/html
 
-# Default command
-CMD ["/usr/bin/supervisord"]
+ENTRYPOINT ["/entrypoint.sh"]
