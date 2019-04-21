@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM centos:7
 
 LABEL maintainer="vanbakhanh@gmail.com"
 
@@ -6,51 +6,38 @@ LABEL maintainer="vanbakhanh@gmail.com"
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Libraries & Runtime
-RUN apt-get update && \
-    apt-get install -y curl \
-    software-properties-common \
-    vim
+RUN yum -y update && yum -y install curl software-properties-common vim yum-utils epel-release
 
-# Install Supervisor
-RUN apt-get install -y supervisor
-
-# Install Apache
-RUN apt-get install -y apache2
-
-# Install Nginx
-RUN apt-get install -y nginx
-
-# Install PHP 7.2
-RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
-RUN apt-get update && \
-    apt-get install -y libapache2-mod-php7.2 \
-    php7.2 \
-    php7.2-cli \
-    php7.2-common \
-    php7.2-curl \
-    php7.2-gd \
-    php7.2-json \
-    php7.2-mbstring \
-    php7.2-intl \
-    php7.2-mysql \
-    php7.2-xml \
-    php7.2-zip \
-    php7.2-cgi \
-    php7.2-xsl \
-    php7.2-fpm
+# Install PHP7.2
+RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+RUN yum-config-manager --enable remi-php72
+RUN yum -y install php72 php72-php-fpm php72-php-mysqlnd php72-php-opcache php72-php-xml php72-php-xmlrpc php72-php-gd php72-php-mbstring php72-php-json
+RUN ln -s /usr/bin/php72 /usr/bin/php
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
+# Install Supervisor
+RUN yum -y install supervisor
+
+# Install Apache
+# RUN yum -y install httpd
+
+# Install Nginx
+RUN yum -y install nginx
+
+# Cleanup
+RUN yum clean all
+
 # Configure vhost Apache
-COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
+# COPY docker/apache/vhost.conf /etc/httpd/example.com.conf
 
 # Configure vhost Nginx
-COPY docker/nginx/vhost /etc/nginx/sites-available/default
+COPY docker/nginx/vhost /etc/nginx/conf.d/example.conf
 
 # Configure supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
 
 # Copy entrypoint shell script
 COPY docker/entrypoint.sh /
@@ -58,6 +45,6 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 80 443
 
-WORKDIR /var/www/html
+WORKDIR /usr/share/nginx/example
 
 ENTRYPOINT ["/entrypoint.sh"]
