@@ -18,7 +18,7 @@ RUN apt-get install -y supervisor
 RUN apt-get install -y apache2
 
 # Install Nginx
-RUN apt-get install -y nginx
+# RUN apt-get install -y nginx
 
 # Install PHP 7.2
 RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
@@ -44,16 +44,17 @@ RUN curl -sS https://getcomposer.org/installer -o composer-setup.php
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 # Configure vhost Apache
-COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY apache/vhost.conf /etc/apache2/sites-available/000-default.conf
+RUN a2enmod rewrite
 
 # Configure vhost Nginx
-COPY docker/nginx/vhost /etc/nginx/sites-available/default
+# COPY nginx/vhost /etc/nginx/sites-available/default
 
 # Configure supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy entrypoint shell script
-COPY docker/entrypoint.sh /
+COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80 443
