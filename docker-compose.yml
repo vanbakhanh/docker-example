@@ -3,6 +3,7 @@ services:
   web:
     build: .
     container_name: example-web
+    privileged: true
     volumes:
       - ./:/usr/share/nginx/example
     ports:
