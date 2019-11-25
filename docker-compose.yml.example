@@ -1,0 +1,40 @@
+version: "3.1"
+services:
+
+  webserver:
+    image: nginx:alpine
+    container_name: codebase-webserver
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./storage/logs/:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+
+  php-fpm:
+    build: docker/php-fpm
+    container_name: codebase-php-fpm
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./docker/php-fpm/php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
+
+  mysql:
+    image: mysql:5.7
+    container_name: codebase-mysql
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=homestead
+      - MYSQL_USER_NAME=root
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:alpine
+    container_name: codebase-redis
