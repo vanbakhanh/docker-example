@@ -3,7 +3,7 @@ services:
 
   webserver:
     image: nginx:alpine
-    container_name: codebase-webserver
+    container_name: app-webserver
     working_dir: /application
     volumes:
       - .:/application
@@ -15,7 +15,7 @@ services:
 
   php-fpm:
     build: docker/php-fpm
-    container_name: codebase-php-fpm
+    container_name: app-php-fpm
     working_dir: /application
     volumes:
       - .:/application
@@ -23,7 +23,7 @@ services:
 
   mysql:
     image: mysql:5.7
-    container_name: codebase-mysql
+    container_name: app-mysql
     working_dir: /application
     volumes:
       - .:/application
@@ -37,4 +37,4 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: codebase-redis
+    container_name: app-redis
